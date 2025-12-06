@@ -48,7 +48,7 @@ public class TreasureHuntLogic {
 
         // Add player
         int[] playerPos = getRandomEmptyPosition();
-        maze[playerPos[0]][playerPos[1]] = 'T';
+        maze[playerPos[0]][playerPos[1]] = 'P';
 
         return maze;
     }
