@@ -11,24 +11,28 @@ public class TreasureHuntUI {
     private JLabel lives;
     private boolean gameOver = false;
 
+    // Icons
     private final ImageIcon PLAYER_ICON = loadScaledIcon("images/player.png", 35, 35);
     private final ImageIcon TREASURE_ICON = loadScaledIcon("images/treasure.png", 28, 28);
     private final ImageIcon TRAP_ICON = loadScaledIcon("images/trap.png", 28, 28);
 
+    // Constructor
     public TreasureHuntUI(TreasureHuntLogic logic) {
         this.LOGIC = logic;
 
+        // Main frame
         JFrame frame = new JFrame("Treasure Hunt");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        frame.add(drawMaze(), BorderLayout.CENTER);
-        frame.add(infoPanel(), BorderLayout.SOUTH);
+        frame.add(generateMazePanel(), BorderLayout.CENTER);
+        frame.add(generateInfoPanel(), BorderLayout.SOUTH);
 
         // Handle WASD movement
         frame.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                // To prevent user from moving after the game ends
                 if (gameOver) return;
                 char key = Character.toUpperCase(e.getKeyChar());
                 if ("WASD".indexOf(key) != -1) {
@@ -45,14 +49,16 @@ public class TreasureHuntUI {
         frame.setVisible(true);
     }
 
-    // Creates the maze grid UI and populates it from the logic
-    private JPanel drawMaze() {
+    // Draw the original maze
+    private JPanel generateMazePanel() {
         int rows = LOGIC.getRows();
         int cols = LOGIC.getCols();
-
+        // Main panel
         mazePanel = new JPanel(new GridLayout(rows, cols, 5, 5));
+        // To store labels (later for changing colors)
         mazeGrid = new JLabel[rows][cols];
 
+        // Generate the initial maze
         char[][] generatedMaze = LOGIC.generateMaze();
 
         for (int r = 0; r < rows; r++) {
@@ -64,6 +70,14 @@ public class TreasureHuntUI {
         }
 
         return mazePanel;
+    }
+
+    // Displays player info such as remaining lives
+    public JPanel generateInfoPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+        lives = new JLabel("Lives: " + LOGIC.getLives());
+        panel.add(lives);
+        return panel;
     }
 
     // Display message if user wins/hits a trap
@@ -104,37 +118,34 @@ public class TreasureHuntUI {
         };
     }
 
+    // Update maze cells
     private void updateCellAppearance(JLabel cell, char type) {
         cell.setIcon(null); // clear previous icon
 
         switch (type) {
+            // Player
             case 'P' -> {
                 cell.setIcon(PLAYER_ICON);
                 cell.setBackground(Color.WHITE);
             }
+            // Treasure
             case 'T' -> {
                 cell.setIcon(TREASURE_ICON);
                 cell.setBackground(Color.WHITE);
             }
+            // Trap
             case 'X' -> {
                 cell.setIcon(TRAP_ICON);
                 cell.setBackground(Color.WHITE);
             }
+            // If it's a wall/ground
             default -> cell.setBackground(getColorFor(type));
         }
     }
 
-
-    // Displays player info such as remaining lives
-    public JPanel infoPanel() {
-        JPanel panel = new JPanel(new FlowLayout());
-        lives = new JLabel("Lives: " + LOGIC.getLives());
-        panel.add(lives);
-        return panel;
-    }
-
     // Refreshes all squares after movement or state changes
     public void refreshMaze() {
+        // New maze
         char[][] maze = LOGIC.getCurrentState();
 
         for (int r = 0; r < LOGIC.getRows(); r++) {
@@ -147,6 +158,7 @@ public class TreasureHuntUI {
         mazePanel.repaint();
     }
 
+    // For icon sizing, without it, they don't fit
     private ImageIcon loadScaledIcon(String path, int width, int height) {
         Image img = new ImageIcon(path).getImage();
         Image scaled = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);

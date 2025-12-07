@@ -68,22 +68,29 @@ public class TreasureHuntLogic {
         String result = "";
 
         switch (direction) {
-            case 'W' -> newRow--;
-            case 'S' -> newRow++;
-            case 'A' -> newCol--;
-            case 'D' -> newCol++;
+            case 'W' -> newRow--; // Up
+            case 'S' -> newRow++; // Down
+            case 'A' -> newCol--; // Left
+            case 'D' -> newCol++; // Right
         }
 
-        char curPos = maze[newRow][newCol];
-        if (curPos != '#') {
-            if (curPos == 'X') {
+        // Position user moved to
+        char newPos = maze[newRow][newCol];
+
+        // If not a wall
+        if (newPos != '#') {
+            // If a trap
+            if (newPos == 'X') {
                 lives--;
                 result = lives > 0 ? "trap" : "loss";
-            } else if (curPos == 'T') {
+            }
+            // If a treasure
+            else if (newPos == 'T') {
                 result = "treasure";
             }
-            // Clear old position
+            // Clear old position so that it doesn't leave a tray
             maze[playerRow][playerCol] = '.';
+
             // Update new position
             playerRow = newRow;
             playerCol = newCol;
