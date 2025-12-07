@@ -5,11 +5,15 @@ public class TreasureHuntLogic {
     private final int ROWS;
     private final int COLS;
     private char[][] maze;
+    private int playerRow;
+    private int playerCol;
+    private int lives;
 
     // Constructor
-    public TreasureHuntLogic(int rows, int cols) {
+    public TreasureHuntLogic(int rows, int cols, int lives) {
         this.ROWS = rows;
         this.COLS = cols;
+        this.lives = lives;
     }
 
     // Get rows
@@ -50,8 +54,38 @@ public class TreasureHuntLogic {
         int[] playerPos = getRandomEmptyPosition();
         maze[playerPos[0]][playerPos[1]] = 'P';
 
+        playerRow = playerPos[0];
+        playerCol = playerPos[1];
+
         return maze;
     }
+
+    // Move player (W/A/S/D)
+    public void movePlayer(char direction) {
+        int newRow = playerRow;
+        int newCol = playerCol;
+
+        switch (direction) {
+            case 'W' -> newRow--;
+            case 'S' -> newRow++;
+            case 'A' -> newCol--;
+            case 'D' -> newCol++;
+        }
+
+        char curPos = maze[newRow][newCol];
+        if (curPos != '#') {
+            if (curPos == 'X') {
+                lives--;
+            }
+            // Clear old position
+            maze[playerRow][playerCol] = '.';
+            // Update new position
+            playerRow = newRow;
+            playerCol = newCol;
+            maze[playerRow][playerCol] = 'P';
+        }
+    }
+
 
     // Check if the coordinates correspond to a wall
     private boolean checkIfWall(int row, int col) {
@@ -68,4 +102,15 @@ public class TreasureHuntLogic {
         } while (maze[row][col] != '.');
         return new int[]{row, col};
     }
+
+    // Get current maze
+    public char[][] getCurrentState() {
+        return maze;
+    }
+
+    // Get current lives
+    public int getLives() {
+        return lives;
+    }
+
 }

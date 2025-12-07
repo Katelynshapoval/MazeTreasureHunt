@@ -1,62 +1,102 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
 public class TreasureHuntUI {
-    //Constants
+
     private final TreasureHuntLogic LOGIC;
     private JLabel[][] mazeGrid;
+    private JPanel mazePanel;
+    private JLabel lives;
 
-    // Constructor
     public TreasureHuntUI(TreasureHuntLogic logic) {
         this.LOGIC = logic;
 
-        // Main frame
-        JFrame frame = new JFrame("MasterMind");
+        JFrame frame = new JFrame("Treasure Hunt");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        // Maze
-        frame.add(drawMaze(), BorderLayout.NORTH);
-        // Info
+        frame.add(drawMaze(), BorderLayout.CENTER);
         frame.add(infoPanel(), BorderLayout.SOUTH);
+
+        // Handle WASD movement
+        frame.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                char key = Character.toUpperCase(e.getKeyChar());
+                if ("WASD".indexOf(key) != -1) {
+                    LOGIC.movePlayer(key);
+                    refreshMaze();
+                }
+            }
+        });
 
         frame.pack();
         frame.setVisible(true);
     }
 
-    public JPanel drawMaze() {
+    // Creates the maze grid UI and populates it from the logic
+    private JPanel drawMaze() {
         int rows = LOGIC.getRows();
         int cols = LOGIC.getCols();
-        JPanel maze = new JPanel(new GridLayout(rows, cols, 10, 10));
-        maze.setSize(500, 500);
+
+        mazePanel = new JPanel(new GridLayout(rows, cols, 5, 5));
+        mazeGrid = new JLabel[rows][cols];
+
         char[][] generatedMaze = LOGIC.generateMaze();
-        mazeGrid = new JLabel[LOGIC.getRows()][LOGIC.getCols()];
+
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
-                JLabel cell = new JLabel();
-                cell.setPreferredSize(new Dimension(30, 30));
-                cell.setOpaque(true);
-                switch (generatedMaze[r][c]) {
-                    case '.' -> cell.setBackground(Color.WHITE);
-                    case '#' -> cell.setBackground(Color.BLACK);
-                    case 'X' -> cell.setBackground(Color.RED);
-                    case 'P' -> cell.setBackground(Color.GREEN);
-                    case 'T' -> cell.setBackground(Color.ORANGE);
-                }
-
-                cell.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                JLabel cell = createCell(generatedMaze[r][c]);
                 mazeGrid[r][c] = cell;
-                maze.add(cell);
+                mazePanel.add(cell);
             }
-
         }
-        return maze;
+
+        return mazePanel;
     }
 
+    // Creates one labeled square of the maze
+    private JLabel createCell(char type) {
+        JLabel cell = new JLabel();
+        cell.setPreferredSize(new Dimension(30, 30));
+        cell.setOpaque(true);
+        cell.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        cell.setBackground(getColorFor(type));
+        return cell;
+    }
+
+    // Maps maze characters to UI colors
+    private Color getColorFor(char ch) {
+        return switch (ch) {
+            case '.' -> Color.WHITE; // Neutral
+            case '#' -> Color.BLACK; // Wall
+            case 'X' -> Color.RED; // Trap
+            case 'P' -> Color.GREEN; // Player
+            case 'T' -> Color.ORANGE; // Treasure
+            default -> Color.GRAY;
+        };
+    }
+
+    // Displays player info such as remaining lives
     public JPanel infoPanel() {
-        JPanel infoPanel = new JPanel(new FlowLayout());
-        JLabel hearts = new JLabel("3");
-        infoPanel.add(hearts);
-        return infoPanel;
+        JPanel panel = new JPanel(new FlowLayout());
+        lives = new JLabel("Lives: " + LOGIC.getLives());
+        panel.add(lives);
+        return panel;
+    }
+
+    // Refreshes all squares after movement or state changes
+    public void refreshMaze() {
+        char[][] maze = LOGIC.getCurrentState();
+
+        for (int r = 0; r < LOGIC.getRows(); r++) {
+            for (int c = 0; c < LOGIC.getCols(); c++) {
+                mazeGrid[r][c].setBackground(getColorFor(maze[r][c]));
+            }
+        }
+        // Update lives
+        lives.setText("Lives: " + LOGIC.getLives());
+        mazePanel.repaint();
     }
 }
