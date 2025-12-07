@@ -60,9 +60,11 @@ public class TreasureHuntLogic {
     }
 
     // Move player (W/A/S/D)
-    public void movePlayer(char direction) {
+    public String movePlayer(char direction) {
         int newRow = playerRow;
         int newCol = playerCol;
+
+        String result = "";
 
         switch (direction) {
             case 'W' -> newRow--;
@@ -75,6 +77,9 @@ public class TreasureHuntLogic {
         if (curPos != '#') {
             if (curPos == 'X') {
                 lives--;
+                result = "trap";
+            } else if (curPos == 'T') {
+                result = "treasure";
             }
             // Clear old position
             maze[playerRow][playerCol] = '.';
@@ -83,6 +88,8 @@ public class TreasureHuntLogic {
             playerCol = newCol;
             maze[playerRow][playerCol] = 'P';
         }
+
+        return result;
     }
 
 

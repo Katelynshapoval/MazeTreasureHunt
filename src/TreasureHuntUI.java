@@ -29,8 +29,17 @@ public class TreasureHuntUI {
             public void keyPressed(KeyEvent e) {
                 char key = Character.toUpperCase(e.getKeyChar());
                 if ("WASD".indexOf(key) != -1) {
-                    LOGIC.movePlayer(key);
+                    String result = LOGIC.movePlayer(key);
                     refreshMaze();
+                    if (!result.isEmpty()) {
+                        String message = "";
+                        if (result == "trap") {
+                            message = "Oops, you hit a trap!";
+                        } else if (result == "treasure") {
+                            message = "Yay, you won!";
+                        }
+                        JOptionPane.showMessageDialog(null, message);
+                    }
                 }
             }
         });
