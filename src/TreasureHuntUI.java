@@ -9,6 +9,10 @@ public class TreasureHuntUI {
     private JPanel mazePanel;
     private JLabel lives;
 
+    private final ImageIcon PLAYER_ICON = loadScaledIcon("images/player.png", 35, 35);
+    private final ImageIcon TREASURE_ICON = loadScaledIcon("images/treasure.png", 28, 28);
+    private final ImageIcon TRAP_ICON = loadScaledIcon("images/trap.png", 28, 28);
+
     public TreasureHuntUI(TreasureHuntLogic logic) {
         this.LOGIC = logic;
 
@@ -61,22 +65,44 @@ public class TreasureHuntUI {
         JLabel cell = new JLabel();
         cell.setPreferredSize(new Dimension(30, 30));
         cell.setOpaque(true);
+        cell.setHorizontalAlignment(SwingConstants.CENTER);
+        cell.setVerticalAlignment(SwingConstants.CENTER);
         cell.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        cell.setBackground(getColorFor(type));
+
+        updateCellAppearance(cell, type);
         return cell;
     }
+
 
     // Maps maze characters to UI colors
     private Color getColorFor(char ch) {
         return switch (ch) {
-            case '.' -> Color.WHITE; // Neutral
+            case '.' -> Color.WHITE; // Ground
             case '#' -> Color.BLACK; // Wall
-            case 'X' -> Color.RED; // Trap
-            case 'P' -> Color.GREEN; // Player
-            case 'T' -> Color.ORANGE; // Treasure
             default -> Color.GRAY;
         };
     }
+
+    private void updateCellAppearance(JLabel cell, char type) {
+        cell.setIcon(null); // clear previous icon
+
+        switch (type) {
+            case 'P' -> {
+                cell.setIcon(PLAYER_ICON);
+                cell.setBackground(Color.WHITE);
+            }
+            case 'T' -> {
+                cell.setIcon(TREASURE_ICON);
+                cell.setBackground(Color.WHITE);
+            }
+            case 'X' -> {
+                cell.setIcon(TRAP_ICON);
+                cell.setBackground(Color.WHITE);
+            }
+            default -> cell.setBackground(getColorFor(type));
+        }
+    }
+
 
     // Displays player info such as remaining lives
     public JPanel infoPanel() {
@@ -92,11 +118,18 @@ public class TreasureHuntUI {
 
         for (int r = 0; r < LOGIC.getRows(); r++) {
             for (int c = 0; c < LOGIC.getCols(); c++) {
-                mazeGrid[r][c].setBackground(getColorFor(maze[r][c]));
+                updateCellAppearance(mazeGrid[r][c], maze[r][c]);
             }
         }
         // Update lives
         lives.setText("Lives: " + LOGIC.getLives());
         mazePanel.repaint();
     }
+
+    private ImageIcon loadScaledIcon(String path, int width, int height) {
+        Image img = new ImageIcon(path).getImage();
+        Image scaled = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(scaled);
+    }
+
 }
