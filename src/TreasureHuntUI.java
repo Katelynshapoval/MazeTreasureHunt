@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Objects;
 
 public class TreasureHuntUI {
 
@@ -8,6 +9,7 @@ public class TreasureHuntUI {
     private JLabel[][] mazeGrid;
     private JPanel mazePanel;
     private JLabel lives;
+    private boolean gameOver = false;
 
     private final ImageIcon PLAYER_ICON = loadScaledIcon("images/player.png", 35, 35);
     private final ImageIcon TREASURE_ICON = loadScaledIcon("images/treasure.png", 28, 28);
@@ -27,18 +29,13 @@ public class TreasureHuntUI {
         frame.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
+                if (gameOver) return;
                 char key = Character.toUpperCase(e.getKeyChar());
                 if ("WASD".indexOf(key) != -1) {
                     String result = LOGIC.movePlayer(key);
                     refreshMaze();
                     if (!result.isEmpty()) {
-                        String message = "";
-                        if (result == "trap") {
-                            message = "Oops, you hit a trap!";
-                        } else if (result == "treasure") {
-                            message = "Yay, you won!";
-                        }
-                        JOptionPane.showMessageDialog(null, message);
+                        displayPopUp(result);
                     }
                 }
             }
@@ -67,6 +64,21 @@ public class TreasureHuntUI {
         }
 
         return mazePanel;
+    }
+
+    // Display message if user wins/hits a trap
+    public void displayPopUp(String result) {
+        String message = "";
+        if (Objects.equals(result, "trap")) {
+            message = "Oops, you hit a trap!";
+        } else if (Objects.equals(result, "treasure")) {
+            gameOver = true;
+            message = "Yay, you won!";
+        } else {
+            gameOver = true;
+            message = "Noo, you lost:(";
+        }
+        JOptionPane.showMessageDialog(null, message);
     }
 
     // Creates one labeled square of the maze

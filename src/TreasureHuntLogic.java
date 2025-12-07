@@ -64,6 +64,7 @@ public class TreasureHuntLogic {
         int newRow = playerRow;
         int newCol = playerCol;
 
+        // For popups
         String result = "";
 
         switch (direction) {
@@ -77,7 +78,7 @@ public class TreasureHuntLogic {
         if (curPos != '#') {
             if (curPos == 'X') {
                 lives--;
-                result = "trap";
+                result = lives > 0 ? "trap" : "loss";
             } else if (curPos == 'T') {
                 result = "treasure";
             }
@@ -91,7 +92,6 @@ public class TreasureHuntLogic {
 
         return result;
     }
-
 
     // Check if the coordinates correspond to a wall
     private boolean checkIfWall(int row, int col) {
