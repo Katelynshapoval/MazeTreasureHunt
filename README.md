@@ -37,5 +37,3 @@ Your goal: find the treasure before losing all your lives.
 - Lives counter displayed below the maze.
 
 
-## Project Structure
-
